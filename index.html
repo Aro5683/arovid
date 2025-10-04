@@ -204,80 +204,57 @@ function renderResults(list){
 
 // Fetches the remote page (via a proxy to avoid CORS for arbitrary pages), extracts link(s), and shows Play Online 1/2 buttons
 async function fetchAndShowStreamButtons(targetUrl, containerEl){
-  containerEl.innerHTML = '<div class="loading">Please wait — fetching available streams...</div>';
-  // use a public CORS-safe proxy to fetch page HTML (keeps it simple for many hosts).
-  // If your target host allows cross-origin, you can replace proxyUrl with targetUrl directly.
-  const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-  let text;
-  try{
-    let resp = await fetch(proxyUrl);
-    if(!resp.ok) throw new Error('proxy fetch failed: ' + resp.status);
-    text = await resp.text();
-  }catch(e){
-    // fallback to codetabs
-    try{
-      const fallback = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl);
-      let r2 = await fetch(fallback);
-      if(!r2.ok) throw new Error('fallback fetch failed: ' + r2.status);
-      text = await r2.text();
-    }catch(e2){
-      throw new Error('Failed to fetch target page.');
+  containerEl.innerHTML = '<div class="loading">Fetching available streams...</div>';
+
+  let anchors = [];
+
+  // Case 1: if targetUrl already looks like a video file → use directly
+  if(/\.(mp4|m3u8|webm)(\?|$)/i.test(targetUrl)){
+    anchors = [targetUrl];
+  } else {
+    // Case 2: fetch only once with fast proxy
+    try {
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+      const resp = await fetch(proxyUrl);
+      const text = await resp.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+
+      let downloadDiv = doc.querySelector('.download');
+      if(downloadDiv){
+        anchors = Array.from(downloadDiv.querySelectorAll('a'))
+          .map(a => new URL(a.getAttribute('href') || a.href, targetUrl).href);
+      }
+
+      if(anchors.length === 0){
+        const regex = /https?:\/\/[^\s"']+\.(mp4|m3u8|webm)/gi;
+        anchors = [...text.matchAll(regex)].map(m => m[0]);
+      }
+    } catch(err){
+      containerEl.innerHTML = '<div class="error">Failed to load links.</div>';
+      return;
     }
   }
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, 'text/html');
-
-  // try to find .download div first (as in your original site)
-  let downloadDiv = doc.querySelector('.download');
-  if(!downloadDiv){
-    // fallback: try to extract the first block that looks like "download" or contains .mp4 links
-    const m = text.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i);
-    if(m && m[0]) downloadDiv = parser.parseFromString(m[0],'text/html').body.firstElementChild;
-  }
-
-  // gather anchors (resolve against targetUrl)
-  let anchors = [];
-  if(downloadDiv){
-    anchors = Array.from(downloadDiv.querySelectorAll('a'))
-      .map(a => (a.getAttribute('href') || a.href || '').trim())
-      .filter(Boolean)
-      .map(h => {
-        try{ return new URL(h, targetUrl).href; }catch(e){ return h; }
-      });
-  }
-
-  // if none found, try to regex-search for direct mp4/m3u8/webm links inside page HTML
-  if(anchors.length === 0){
-    const re = /href=["']([^"']+\.(mp4|webm|m3u8))["']/ig;
-    const found = [...text.matchAll(re)].map(m => m[1]);
-    anchors = found.map(h => {
-      try{ return new URL(h, targetUrl).href; }catch(e){ return h; }
-    }).filter(Boolean);
-  }
+  // Deduplicate
+  anchors = Array.from(new Set(anchors));
 
   if(anchors.length === 0){
-    containerEl.innerHTML = '<div class="error">No playable links found on that page.</div>';
+    containerEl.innerHTML = '<div class="error">No playable links found.</div>';
     return;
   }
 
-  // remove duplicates & keep only unique URLs
-  anchors = Array.from(new Set(anchors));
-
-  // create Play Online buttons
+  // Show Play Online 1,2,3...
   containerEl.innerHTML = '';
   anchors.forEach((link, i) => {
     const btn = document.createElement('button');
     btn.className = 'play-btn';
     btn.textContent = `Play Online ${i+1}`;
-    btn.dataset.link = link;
-    btn.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      // directly open player overlay (no popup, no redirect)
-      playVideoOverlay(link, { title: `Play Online ${i+1}` });
-    });
+    btn.onclick = () => playVideoOverlay(link, { title: `Play Online ${i+1}` });
     containerEl.appendChild(btn);
   });
+}
 
   // small note for the user
   const note = document.createElement('div');

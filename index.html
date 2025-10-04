@@ -354,74 +354,55 @@ function openPlayer(url, opts = {}){
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden','false');
 
-  // reset video
+  // reset
   playerVideo.pause();
   playerVideo.removeAttribute('src');
   while(playerVideo.firstChild) playerVideo.removeChild(playerVideo.firstChild);
 
-  // create source
-  const src = document.createElement('source');
-  src.src = url;
-  if(url.match(/\.m3u8(\?|$)/i)) src.type = 'application/vnd.apple.mpegurl';
-  else if(url.match(/\.webm(\?|$)/i)) src.type = 'video/webm';
-  else src.type = 'video/mp4';
-  playerVideo.appendChild(src);
+  // HLS (m3u8) handling
+  if (url.endsWith('.m3u8') && Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(playerVideo);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      playerNotice.style.display = 'none';
+      playerVideo.play().catch(()=> bigPlay.style.display = 'block');
+    });
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      playerNotice.textContent = 'Stream error, opening in new tab...';
+      setTimeout(()=>{ window.open(url, '_blank'); closeOverlay(); }, 1000);
+    });
+  } else {
+    // MP4 / WebM direct
+    const src = document.createElement('source');
+    src.src = url;
+    if(url.match(/\.webm$/i)) src.type = 'video/webm';
+    else src.type = 'video/mp4';
+    playerVideo.appendChild(src);
 
-  // try autoplay muted for fastest start
-  playerVideo.muted = true;
-  playerVideo.setAttribute('playsinline','');
-  playerVideo.load();
-
-  // show big play while loading, hide on canplay
-  bigPlay.style.display = 'none';
-  let canPlay = false;
-  const onCan = ()=>{
-    canPlay = true;
-    playerNotice.style.display = 'none';
-    bigPlay.style.display = 'none';
-    // attempt to play (muted allows autoplay)
-    const p = playerVideo.play();
-    if(p && typeof p.then === 'function'){
-      p.catch(()=>{
-        // if autoplay blocked, show big play button to let user start
-        bigPlay.style.display = 'block';
-      });
+    playerVideo.load();
+    const tryPlay = playerVideo.play();
+    if (tryPlay && tryPlay.catch) {
+      tryPlay.catch(()=> bigPlay.style.display = 'block');
     }
-  };
-  playerVideo.addEventListener('canplay', onCan, {once:true});
+    playerVideo.oncanplay = () => {
+      playerNotice.style.display = 'none';
+      bigPlay.style.display = 'none';
+    };
+    playerVideo.onerror = () => {
+      playerNotice.textContent = 'Cannot play video, opening in new tab...';
+      setTimeout(()=>{ window.open(url, '_blank'); closeOverlay(); }, 1000);
+    };
+  }
 
-  // handle play errors (likely CORS) -> fallback open in new tab and close overlay
-  const onErr = (e)=>{
-    playerNotice.style.display = 'block';
-    playerNotice.textContent = 'Could not play inside page — opening in a new tab...';
-    setTimeout(()=>{ 
-      try{ window.open(url, '_blank'); }catch(e){ /* ignore */ }
-      closeOverlay();
-    }, 800);
-  };
-  playerVideo.addEventListener('error', onErr, {once:true});
-
-  // on bigPlay clicked: unmute and play
-  bigPlay.onclick = ()=>{
+  bigPlay.onclick = () => {
     playerVideo.muted = false;
-    playerVideo.play().catch(()=>{});
+    playerVideo.play();
     bigPlay.style.display = 'none';
   };
 
-  // clicking close
   closePlayerBtn.onclick = closeOverlay;
   overlay.onclick = (e) => { if(e.target === overlay) closeOverlay(); };
-  const escHandler = (ev) => { if(ev.key === 'Escape') closeOverlay(); };
-  document.addEventListener('keydown', escHandler, {once:true});
-
-  // small optimization: try to play muted immediately, but if not possible show bigPlay
-  playerVideo.play().then(()=>{ playerNotice.style.display = 'none'; }).catch(()=>{ playerNotice.style.display = 'none'; bigPlay.style.display = 'block'; });
-}
-
-function closeOverlay(){
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden','true');
-  try{ playerVideo.pause(); playerVideo.removeAttribute('src'); while(playerVideo.firstChild) playerVideo.removeChild(playerVideo.firstChild); }catch(e){}
 }
 
 /* Search logic */

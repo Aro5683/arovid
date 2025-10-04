@@ -1,75 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Movies Aro — Play Online</title>
+<title>Movies Aro — Fast Play</title>
 <style>
-:root{
-  --bg:#0d1117;--card:rgba(255,255,255,0.06);
-  --accent:#00c6ff;--accent2:#0072ff;--text:#e6edf3;--muted:#8b949e;
-  --error:#ff6b6b;
-}
-html,body{height:100%;background:linear-gradient(135deg,#0d1117,#161b22);color:var(--text);margin:0;font-family:Inter,Segoe UI,sans-serif;}
-.wrap{max-width:980px;margin:18px auto;padding:0 16px;}
-h1{ text-align:center;font-size:2.0rem;margin-bottom:18px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.controls{display:flex;gap:10px;margin-bottom:12px;}
-input[type="text"]{flex:1;padding:10px 12px;border-radius:8px;border:none;background:var(--card);color:var(--text);outline:none}
-button{padding:10px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;font-weight:700}
-.hint{color:var(--muted);font-size:0.95rem;margin-bottom:10px}
-.result{background:var(--card);border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 20px rgba(0,0,0,0.4)}
-.meta{font-size:0.95rem;white-space:pre-wrap;color:var(--text);margin-bottom:10px}
-.links{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
-.play-btn{display:inline-block;margin:6px 8px 6px 0;padding:8px 12px;border-radius:6px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);cursor:pointer}
-.play-btn:hover{border-color:var(--accent2);color:var(--accent2)}
-.error{color:var(--error);font-weight:700}
-.loading{color:var(--muted)}
+  :root{
+    --bg:#071019; --card:#0f1720; --muted:#9aa6b2; --accent:#ff4d6d; --accent2:#6b8bff;
+    --text:#e6eef6; --glass: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,Segoe UI,system-ui; background:linear-gradient(180deg,#061017 0%, #071321 100%); color:var(--text);}
+  .container{max-width:1100px;margin:26px auto;padding:20px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  h1{margin:0;font-size:20px;font-weight:800;letter-spacing:0.2px;background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+  .top-info{color:var(--muted);font-size:13px}
+  .search-row{display:flex;gap:10px;margin:18px 0}
+  .search {flex:1;display:flex;gap:8px;align-items:center;background:var(--glass);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .search input{flex:1;border:0;background:transparent;color:var(--text);outline:none;font-size:15px;padding:8px}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn:active{transform:translateY(1px)}
+  .note{font-size:13px;color:var(--muted);margin-top:6px}
 
-/* YouTube-style overlay player */
-#video-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:99999}
-.yt-player{width:90%;max-width:1100px;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.7)}
-.yt-player .top-bar{position:absolute;left:0;right:0;top:0;height:44px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg, rgba(0,0,0,0.25), transparent);color:#fff;z-index:2}
-.yt-player .title{font-weight:600; font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.close-btn{background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer}
-.yt-player video{width:100%;height:100%;background:#000;display:block}
-.small-note{color:var(--muted);font-size:0.85rem;margin-top:8px;text-align:center}
+  /* results */
+  #output{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+  .filename{font-weight:700;color:var(--text);margin-bottom:8px}
+  .filesize{color:var(--muted);font-size:13px;margin-bottom:10px}
+  .play-main{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--accent);cursor:pointer;font-weight:700}
+  .server-buttons{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+  .server-btn{background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:7px 10px;border-radius:8px;color:var(--accent2);cursor:pointer;font-weight:700}
+  .server-btn.small{font-size:13px;padding:6px 8px}
 
-/* Mobile tweaks */
-@media (max-width:640px){
-  .controls{flex-direction:column}
-  button{width:100%}
-  .yt-player{width:98%}
-}
+  .status{color:var(--muted);font-size:13px;margin-top:10px}
+
+  /* overlay player (YouTube-like theme) */
+  #overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:99999}
+  #overlay.show{display:flex}
+  .player{width:92%;max-width:1200px;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.7)}
+  .player .top{position:absolute;left:0;right:0;top:0;height:56px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;color:#fff;background:linear-gradient(180deg, rgba(0,0,0,0.35), transparent);z-index:10}
+  .player .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:85%}
+  .close{background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer}
+  .player video{width:100%;height:100%;display:block;background:#000}
+  .big-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;border-radius:999px;border:0;padding:18px 22px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;font-weight:800;font-size:18px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+  .player .notice{position:absolute;left:12px;bottom:12px;color:var(--muted);font-size:13px}
+  .spinner{border:3px solid rgba(255,255,255,0.06);border-top:3px solid rgba(255,255,255,0.12);border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  footer{margin:24px 0 40px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:640px){ .player{width:98%} .search-row{flex-direction:column} }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Movies Aro</h1>
+<div class="container">
+  <header>
+    <div>
+      <h1>Movies Aro — Fast Play</h1>
+      <div class="top-info">Search your index & play online instantly — no popups, Play Online 1/2 buttons appear per item.</div>
+    </div>
+    <div class="top-info" id="loadStatus">Loading index...</div>
+  </header>
 
-  <div class="controls">
-    <input id="q" type="text" placeholder="Type file name..." />
-    <button id="searchBtn">Search</button>
+  <div class="search-row">
+    <div class="search">
+      <input id="q" placeholder="Search file name (e.g. mymovie). Press Enter or click Search" />
+      <button class="btn" id="searchBtn">Search</button>
+    </div>
   </div>
-
-  <div class="hint">⌛ Please wait.. <span id="count">10</span> seconds then search</div>
-
-  <div class="button-box" style="text-align:center;margin:18px 0;">
-    <button onclick="window.open('https://moviesaro.netlify.app', '_self')">Go to Movies Aro (OLD)</button>
-    <button onclick="window.open('https://moviesarodub.netlify.app', '_self')">All Tamil Dubbed Movies</button>
-  </div>
+  <div class="note">Tip: Place your .txt index files next to this HTML in your repo OR set <code>GITHUB_RAW_BASE</code> inside the script.</div>
 
   <div id="output"></div>
-  <div id="debug" style="margin-top:14px;color:var(--muted);font-size:0.9rem"></div>
+  <div id="debug" style="margin-top:14px;color:var(--muted);font-size:13px"></div>
+  <footer>Built for quick testing • If streams fail due to CORS, the player will open the link in a new tab.</footer>
+</div>
+
+<!-- overlay player -->
+<div id="overlay" role="dialog" aria-hidden="true">
+  <div class="player" role="region" aria-label="Video player">
+    <div class="top">
+      <div class="title" id="playerTitle">Playing</div>
+      <button class="close" id="closePlayer" title="Close (Esc)">✕</button>
+    </div>
+    <video id="playerVideo" playsinline controls preload="metadata" controlsList="nodownload"></video>
+    <button id="bigPlay" class="big-play" style="display:none">▶</button>
+    <div class="notice" id="playerNotice" style="display:none">Loading stream... <span class="spinner"></span></div>
+  </div>
 </div>
 
 <script>
-/*
-  IMPORTANT:
-  - If your .txt files are in the same folder as this HTML on GitHub Pages -> leave GITHUB_RAW_BASE = ''.
-  - If your .txt files are located elsewhere on GitHub, set GITHUB_RAW_BASE to the raw URL prefix, e.g:
-    "https://raw.githubusercontent.com/USERNAME/REPO/main/path/to/txts/"
+/* === CONFIG ===
+ If your .txt files are hosted in a different location (raw.githubusercontent.com), set GITHUB_RAW_BASE to the raw folder URL:
+ Example: "https://raw.githubusercontent.com/USERNAME/REPO/main/txts/"
+ If they are in the same folder as this HTML, leave it as ''.
 */
-const GITHUB_RAW_BASE = ''; // <-- set this if needed
+const GITHUB_RAW_BASE = ''; // <-- set if needed
 
 const yearlyFiles = [
   "1920.txt","1945.txt","1947.txt","1950.txt","1993.txt","1995.txt","1996.txt","1999.txt",
@@ -78,306 +102,352 @@ const yearlyFiles = [
   "2022.txt","2023.txt","2024.txt","2025.txt","Unknown_Year.txt"
 ];
 
-let files = [];
+let files = []; // {name,size,link,srcFile}
+const loadStatusEl = document.getElementById('loadStatus');
+const debugEl = document.getElementById('debug');
 
-function debugLog(msg){ const dbg=document.getElementById('debug'); dbg.textContent = msg; console.log('[debug]', msg); }
+function dbg(msg){ debugEl.textContent = msg; console.log(msg); }
 
-// try a list of candidate URLs to fetch a file
-async function tryFetchFile(fname){
+function fetchWithTimeout(url, ms = 7000){
+  const controller = new AbortController();
+  const id = setTimeout(()=>controller.abort(), ms);
+  return fetch(url, {signal: controller.signal}).finally(()=>clearTimeout(id));
+}
+
+async function tryFetchCandidates(fname){
   const candidates = [];
-  // relative first
+  // user provided base
+  if(GITHUB_RAW_BASE && GITHUB_RAW_BASE.trim()){
+    candidates.push(GITHUB_RAW_BASE.trim() + fname);
+  }
+  // try relative paths
   candidates.push(fname);
   candidates.push('./' + fname);
-  // user-specified raw base
-  if(GITHUB_RAW_BASE && GITHUB_RAW_BASE.trim()){
-    const base = GITHUB_RAW_BASE.trim();
-    candidates.push(base + fname);
-  }
-  // If hosted on github pages, attempt to derive raw.githubusercontent.com paths
+  // If hosted on github.io, try raw.githubusercontent.com guesses
   try{
-    if(location.hostname.endsWith('github.io')){
-      const username = location.hostname.split('.')[0];
-      const parts = location.pathname.split('/').filter(Boolean);
-      const repoCandidate = parts[0] || (username + '.github.io');
+    const host = location.hostname;
+    if(host.endsWith('github.io')){
+      const username = host.split('.')[0];
+      const pathParts = location.pathname.split('/').filter(Boolean);
+      const repo = pathParts[0] || (username + '.github.io');
       ['main','master'].forEach(br=>{
-        candidates.push(`https://raw.githubusercontent.com/${username}/${repoCandidate}/${br}/${fname}`);
+        candidates.push(`https://raw.githubusercontent.com/${username}/${repo}/${br}/${fname}`);
         candidates.push(`https://raw.githubusercontent.com/${username}/${username}.github.io/${br}/${fname}`);
       });
     }
   }catch(e){ /* ignore */ }
 
-  for(const url of candidates){
+  // last-resort: raw.githubusercontent.com with location pathname as repo
+  const uniq = Array.from(new Set(candidates));
+  for(const url of uniq){
     try{
-      // small timeout helper
-      const controller = new AbortController();
-      const id = setTimeout(()=>controller.abort(), 8000);
-      const resp = await fetch(url, {signal: controller.signal});
-      clearTimeout(id);
+      const resp = await fetchWithTimeout(url, 7000);
       if(resp && resp.ok){
         const text = await resp.text();
-        if(text && text.trim().length > 10){
-          console.info('Loaded', fname, 'from', url);
-          return { text, sourceUrl: url };
+        if(text && text.trim().length > 5){
+          return { text, source: url };
         }
       }
     }catch(err){
-      // ignore; try next
-      // console.warn('Failed', url, err);
+      // try next
     }
   }
   return null;
 }
 
 async function loadAllFiles(){
-  files = [];
-  debugLog('Loading index files...');
-  for(const f of yearlyFiles){
-    try{
-      const result = await tryFetchFile(f);
-      if(!result){
-        console.warn('Could not load', f);
-        continue;
-      }
-      const data = result.text;
-      // split by --- blocks (existing format)
-      const rawBlocks = data.split('---').map(b=>b.trim()).filter(Boolean);
-      const parsed = rawBlocks.map(block=>{
-        const nameM = block.match(/File Name:\s*(.*)/i);
-        const sizeM = block.match(/File Size:\s*(.*)/i);
-        const linkM = block.match(/Download Link:\s*(.*)/i);
-        return {
-          name: nameM ? nameM[1].trim() : '',
-          size: sizeM ? sizeM[1].trim() : '',
-          link: linkM ? linkM[1].trim() : '',
-          srcFile: result.sourceUrl
-        };
-      }).filter(f=>f.name && f.link);
-      files = files.concat(parsed);
-    }catch(e){
-      console.error('loadAllFiles error', e);
-    }
-  }
-  debugLog(`Loaded ${files.length} records from index files.`);
+  loadStatusEl.textContent = 'Loading indexes...';
+  const tasks = yearlyFiles.map(fname => (async ()=>{
+    const res = await tryFetchCandidates(fname);
+    if(!res) return [];
+    const raw = res.text;
+    const blocks = raw.split('---').map(s=>s.trim()).filter(Boolean);
+    const parsed = blocks.map(block=>{
+      const nameM = block.match(/File Name:\s*(.*)/i);
+      const sizeM = block.match(/File Size:\s*(.*)/i);
+      const linkM = block.match(/Download Link:\s*(.*)/i);
+      return {
+        name: nameM ? nameM[1].trim() : '',
+        size: sizeM ? sizeM[1].trim() : '',
+        link: linkM ? linkM[1].trim() : '',
+        src: res.source
+      };
+    }).filter(x=>x.name && x.link);
+    return parsed;
+  })());
+
+  const settled = await Promise.allSettled(tasks);
+  const results = settled.flatMap(s => (s.status === 'fulfilled' ? s.value : []));
+  files = results;
+  loadStatusEl.textContent = `Index loaded — ${files.length} items`;
+  dbg(`Loaded ${files.length} items from index files.`);
   if(files.length === 0){
-    document.getElementById('output').innerHTML = '<div class="error">No index entries loaded. Make sure your .txt files are reachable. If they are on GitHub, set the GITHUB_RAW_BASE variable near the top of this script to your raw URL prefix (see comments).</div>';
+    loadStatusEl.textContent = 'No index entries loaded';
+    dbg('No entries loaded. Ensure .txt files are reachable (set GITHUB_RAW_BASE if needed).');
+    document.getElementById('output').innerHTML = '<div style="color:#ff8080">No index entries loaded. If your txt files are on GitHub, set GITHUB_RAW_BASE variable in the script to the raw URL prefix.</div>';
   }
 }
 
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* Utility to escape */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Render results */
+const output = document.getElementById('output');
 
 function renderResults(list){
-  const outEl = document.getElementById('output');
-  outEl.innerHTML = '';
+  output.innerHTML = '';
   if(!list.length){
-    outEl.innerHTML = '<div class="error">No results found.</div>';
+    output.innerHTML = `<div class="card"><div class="filename">No results</div><div class="filesize">Try different keywords</div></div>`;
     return;
   }
-  list.forEach((f,idx)=>{
-    const container = document.createElement('div');
-    container.className = 'result';
-    container.innerHTML = `
-      <div class="meta">File Name: ${escapeHtml(f.name)}\nFile Size: ${escapeHtml(f.size)}</div>
-      <div style="margin-top:8px;"><button data-link="${escapeHtml(f.link)}" class="play-main-btn">Play Online</button></div>
-      <div class="links" id="links-${idx}" aria-live="polite"></div>
+  list.forEach((f, idx) => {
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `
+      <div class="filename">${esc(f.name)}</div>
+      <div class="filesize">${esc(f.size || 'Unknown size')}</div>
+      <div><button class="play-main">Play Online</button></div>
+      <div class="server-buttons" id="servers-${idx}"></div>
+      <div class="status" id="status-${idx}"></div>
     `;
-    outEl.appendChild(container);
+    output.appendChild(card);
 
-    const playBtn = container.querySelector('.play-main-btn');
-    const linksContainer = container.querySelector(`#links-${idx}`);
+    const playMain = card.querySelector('.play-main');
+    const serversDiv = card.querySelector(`#servers-${idx}`);
+    const statusEl = card.querySelector(`#status-${idx}`);
 
-    playBtn.addEventListener('click', async ()=>{
-      playBtn.disabled = true;
-      const originalText = playBtn.textContent;
-      playBtn.textContent = 'Fetching streams...';
-      linksContainer.innerHTML = '';
-      try{
-        await fetchAndShowStreamButtons(playBtn.dataset.link, linksContainer);
-      }catch(err){
-        linksContainer.innerHTML = `<div class="error">Error: ${escapeHtml(err.message || String(err))}</div>`;
-      }finally{
-        playBtn.disabled = false;
-        playBtn.textContent = originalText;
+    playMain.addEventListener('click', async ()=>{
+      // immediate UI update
+      serversDiv.innerHTML = ''; statusEl.textContent = 'Loading servers...';
+      // if link looks like direct media, show immediately
+      const link = f.link;
+      let anchors = [];
+      if(/\.(mp4|webm|m3u8)(?:[?#]|$)/i.test(link)){
+        anchors = [link];
+      } else {
+        // fetch page and extract anchors (fast)
+        try{
+          anchors = await extractPlayableLinks(link);
+        }catch(err){
+          statusEl.textContent = 'Could not fetch links: ' + (err.message || err);
+          return;
+        }
       }
+
+      if(!anchors || anchors.length === 0){
+        statusEl.textContent = 'No servers found';
+        return;
+      }
+      // show Play Online 1/2/...
+      anchors = Array.from(new Set(anchors)).slice(0, 8); // limit 8 servers
+      serversDiv.innerHTML = '';
+      anchors.forEach((a, i)=>{
+        const b = document.createElement('button');
+        b.className = 'server-btn small';
+        b.textContent = `Play Online ${i+1}`;
+        b.dataset.url = a;
+        b.addEventListener('click', (ev)=>{
+          ev.preventDefault();
+          // open player immediately and play
+          openPlayer(a, { title: `${f.name} — Server ${i+1}` });
+        });
+        serversDiv.appendChild(b);
+      });
+      statusEl.textContent = `Found ${anchors.length} server(s)`;
     });
   });
 }
 
-// Fetches the remote page (via a proxy to avoid CORS for arbitrary pages), extracts link(s), and shows Play Online 1/2 buttons
-async function fetchAndShowStreamButtons(targetUrl, containerEl){
-  containerEl.innerHTML = '<div class="loading">Fetching available streams...</div>';
-
-  let anchors = [];
-
-  // Case 1: if targetUrl already looks like a video file → use directly
-  if(/\.(mp4|m3u8|webm)(\?|$)/i.test(targetUrl)){
-    anchors = [targetUrl];
-  } else {
-    // Case 2: fetch only once with fast proxy
-    try {
-      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-      const resp = await fetch(proxyUrl);
-      const text = await resp.text();
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-
-      let downloadDiv = doc.querySelector('.download');
-      if(downloadDiv){
-        anchors = Array.from(downloadDiv.querySelectorAll('a'))
-          .map(a => new URL(a.getAttribute('href') || a.href, targetUrl).href);
-      }
-
-      if(anchors.length === 0){
-        const regex = /https?:\/\/[^\s"']+\.(mp4|m3u8|webm)/gi;
-        anchors = [...text.matchAll(regex)].map(m => m[0]);
-      }
-    } catch(err){
-      containerEl.innerHTML = '<div class="error">Failed to load links.</div>';
-      return;
-    }
+/* Extract playable links from a target page (fast).
+   Tries (1) .download anchors, (2) anchors with mp4/webm/m3u8, (3) regex find
+*/
+async function extractPlayableLinks(targetUrl){
+  // quick attempt: if targetUrl is affixed with a redirect param or contains encoded url, try to decode
+  if(/\.(mp4|webm|m3u8)(?:[?#]|$)/i.test(targetUrl)){
+    return [targetUrl];
   }
+  // try fetch via fast public proxy (allorigins), fallback to codetabs
+  const proxies = [
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    // fallback: jina.ai raw fetch (works as plain text)
+    url => `https://r.jina.ai/http://r.jina.ai/http://${encodeURIComponent(url)}` // note: last-resort, may not work
+  ];
 
-  // Deduplicate
-  anchors = Array.from(new Set(anchors));
-
-  if(anchors.length === 0){
-    containerEl.innerHTML = '<div class="error">No playable links found.</div>';
-    return;
-  }
-
-  // Show Play Online 1,2,3...
-  containerEl.innerHTML = '';
-  anchors.forEach((link, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'play-btn';
-    btn.textContent = `Play Online ${i+1}`;
-    btn.onclick = () => playVideoOverlay(link, { title: `Play Online ${i+1}` });
-    containerEl.appendChild(btn);
-  });
-}
-
-  // small note for the user
-  const note = document.createElement('div');
-  note.className = 'small-note';
-  note.textContent = 'If the player cannot play a stream because of server CORS/settings, the link will open in a new tab as a fallback.';
-  containerEl.appendChild(note);
-}
-
-// Creates a YouTube-style, dark overlay player and plays the given video URL
-function playVideoOverlay(url, opts = {}){
-  // remove existing overlay if any
-  const existing = document.getElementById('video-overlay');
-  if(existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'video-overlay';
-
-  const playerWrap = document.createElement('div');
-  playerWrap.className = 'yt-player';
-
-  // Topbar with title + close
-  const topBar = document.createElement('div');
-  topBar.className = 'top-bar';
-  const title = document.createElement('div');
-  title.className = 'title';
-  title.textContent = opts.title || url;
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'close-btn';
-  closeBtn.innerHTML = '&#10005;';
-  closeBtn.title = 'Close (Esc)';
-
-  topBar.appendChild(title);
-  topBar.appendChild(closeBtn);
-
-  const videoEl = document.createElement('video');
-  videoEl.setAttribute('playsinline', '');
-  videoEl.setAttribute('controls', '');
-  videoEl.setAttribute('autoplay', '');
-  videoEl.setAttribute('preload', 'metadata');
-  videoEl.setAttribute('controlsList', 'nodownload');
-  videoEl.setAttribute('crossorigin', 'anonymous'); // may help with some CORS setups
-  videoEl.addEventListener('contextmenu', e => e.preventDefault());
-
-  // MP4 source
-  const source = document.createElement('source');
-  source.src = url;
-  // try to detect type from URL
-  if(url.match(/\.m3u8(\?|$)/i)) source.type = 'application/vnd.apple.mpegurl';
-  else if(url.match(/\.webm(\?|$)/i)) source.type = 'video/webm';
-  else source.type = 'video/mp4';
-  videoEl.appendChild(source);
-
-  // Error handling: fallback to opening a new tab
-  let errorHandled = false;
-  videoEl.addEventListener('error', (ev) => {
-    if(errorHandled) return;
-    errorHandled = true;
-    console.warn('Video error, opening in new tab as fallback:', url, ev);
+  let text = null;
+  for(const makeProxy of proxies){
+    const purl = makeProxy(targetUrl);
     try{
-      window.open(url, '_blank');
-      // show a small message then close overlay
-      const msg = document.createElement('div');
-      msg.className = 'small-note';
-      msg.textContent = 'Could not play inside the page — opened the stream in a new tab.';
-      playerWrap.appendChild(msg);
-      setTimeout(()=>{ overlay.remove(); }, 2000);
-    }catch(e){
-      overlay.remove();
-    }
-  });
-
-  // append elements
-  playerWrap.appendChild(topBar);
-  playerWrap.appendChild(videoEl);
-  overlay.appendChild(playerWrap);
-  document.body.appendChild(overlay);
-
-  // close handlers
-  closeBtn.addEventListener('click', ()=> overlay.remove());
-  overlay.addEventListener('click', (ev)=> {
-    if(ev.target === overlay) overlay.remove(); // click outside closes
-  });
-  document.addEventListener('keydown', function escHandler(e){
-    if(e.key === 'Escape'){ overlay.remove(); document.removeEventListener('keydown', escHandler); }
-  });
-
-  // try to play (browsers may block autoplay with sound, so we try and ignore failures)
-  const playPromise = videoEl.play();
-  if(playPromise && typeof playPromise.then === 'function'){
-    playPromise.catch(err => {
-      // some browsers block autoplay with sound; mute then play
-      try{
-        videoEl.muted = true;
-        videoEl.play().catch(()=>{});
-      }catch(e){ /* ignore */ }
-    });
+      const resp = await fetchWithTimeout(purl, 7000);
+      if(resp && resp.ok){
+        const t = await resp.text();
+        if(t && t.length > 10){
+          text = t;
+          break;
+        }
+      }
+    }catch(e){ /* try next proxy */ }
   }
+  if(!text){
+    throw new Error('Failed to fetch target page (proxy attempts failed).');
+  }
+
+  // parse the HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'text/html');
+
+  // 1) .download container anchors
+  let anchors = [];
+  const downloadDiv = doc.querySelector('.download');
+  if(downloadDiv){
+    anchors = Array.from(downloadDiv.querySelectorAll('a'))
+      .map(a => (a.getAttribute('href') || a.href || '').trim())
+      .filter(Boolean)
+      .map(h => {
+        try{ return new URL(h, targetUrl).href; }catch(e){ return h; }
+      });
+  }
+
+  // 2) anchors with extension
+  if(anchors.length === 0){
+    anchors = Array.from(doc.querySelectorAll('a'))
+      .map(a => (a.getAttribute('href') || a.href || '').trim())
+      .filter(Boolean)
+      .map(h => {
+        try{ return new URL(h, targetUrl).href; }catch(e){ return h; }
+      })
+      .filter(u => /\.(mp4|webm|m3u8)(?:[?#]|$)/i.test(u));
+  }
+
+  // 3) regex scan inside the page for direct links
+  if(anchors.length === 0){
+    const re = /https?:\/\/[^\s"']+\.(mp4|webm|m3u8)(?:\?[^\s"']*)?/ig;
+    anchors = Array.from(new Set([...text.matchAll(re)].map(m => m[0])));
+  }
+
+  // last-ditch: try to find links with "download" or "server" text near by
+  if(anchors.length === 0){
+    const possible = Array.from(doc.querySelectorAll('a')).map(a => ({href: a.getAttribute('href')||a.href||'', text: a.textContent||''})).filter(x=>x.href);
+    // prefer anchors whose text contains 'server' or 'download' or 'play'
+    const filtered = possible.filter(x=>/server|download|play|online/i.test(x.text));
+    if(filtered.length>0){
+      anchors = filtered.map(x=>{
+        try{return new URL(x.href, targetUrl).href}catch(e){return x.href;}
+      });
+    }
+  }
+
+  return anchors;
 }
 
-// Search wiring
+/* Player overlay logic */
+const overlay = document.getElementById('overlay');
+const playerVideo = document.getElementById('playerVideo');
+const playerTitle = document.getElementById('playerTitle');
+const closePlayerBtn = document.getElementById('closePlayer');
+const bigPlay = document.getElementById('bigPlay');
+const playerNotice = document.getElementById('playerNotice');
+
+function openPlayer(url, opts = {}){
+  playerTitle.textContent = opts.title || url;
+  playerNotice.style.display = 'block';
+  playerNotice.textContent = 'Loading stream...';
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+
+  // reset video
+  playerVideo.pause();
+  playerVideo.removeAttribute('src');
+  while(playerVideo.firstChild) playerVideo.removeChild(playerVideo.firstChild);
+
+  // create source
+  const src = document.createElement('source');
+  src.src = url;
+  if(url.match(/\.m3u8(\?|$)/i)) src.type = 'application/vnd.apple.mpegurl';
+  else if(url.match(/\.webm(\?|$)/i)) src.type = 'video/webm';
+  else src.type = 'video/mp4';
+  playerVideo.appendChild(src);
+
+  // try autoplay muted for fastest start
+  playerVideo.muted = true;
+  playerVideo.setAttribute('playsinline','');
+  playerVideo.load();
+
+  // show big play while loading, hide on canplay
+  bigPlay.style.display = 'none';
+  let canPlay = false;
+  const onCan = ()=>{
+    canPlay = true;
+    playerNotice.style.display = 'none';
+    bigPlay.style.display = 'none';
+    // attempt to play (muted allows autoplay)
+    const p = playerVideo.play();
+    if(p && typeof p.then === 'function'){
+      p.catch(()=>{
+        // if autoplay blocked, show big play button to let user start
+        bigPlay.style.display = 'block';
+      });
+    }
+  };
+  playerVideo.addEventListener('canplay', onCan, {once:true});
+
+  // handle play errors (likely CORS) -> fallback open in new tab and close overlay
+  const onErr = (e)=>{
+    playerNotice.style.display = 'block';
+    playerNotice.textContent = 'Could not play inside page — opening in a new tab...';
+    setTimeout(()=>{ 
+      try{ window.open(url, '_blank'); }catch(e){ /* ignore */ }
+      closeOverlay();
+    }, 800);
+  };
+  playerVideo.addEventListener('error', onErr, {once:true});
+
+  // on bigPlay clicked: unmute and play
+  bigPlay.onclick = ()=>{
+    playerVideo.muted = false;
+    playerVideo.play().catch(()=>{});
+    bigPlay.style.display = 'none';
+  };
+
+  // clicking close
+  closePlayerBtn.onclick = closeOverlay;
+  overlay.onclick = (e) => { if(e.target === overlay) closeOverlay(); };
+  const escHandler = (ev) => { if(ev.key === 'Escape') closeOverlay(); };
+  document.addEventListener('keydown', escHandler, {once:true});
+
+  // small optimization: try to play muted immediately, but if not possible show bigPlay
+  playerVideo.play().then(()=>{ playerNotice.style.display = 'none'; }).catch(()=>{ playerNotice.style.display = 'none'; bigPlay.style.display = 'block'; });
+}
+
+function closeOverlay(){
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  try{ playerVideo.pause(); playerVideo.removeAttribute('src'); while(playerVideo.firstChild) playerVideo.removeChild(playerVideo.firstChild); }catch(e){}
+}
+
+/* Search logic */
 const qEl = document.getElementById('q');
 const searchBtn = document.getElementById('searchBtn');
 
-function doSearch(){
-  const q = qEl.value.trim();
-  if(!q){ document.getElementById('output').innerHTML = '<div class="hint">Type a search term.</div>'; return; }
-  const filtered = files.filter(f => f.name.toLowerCase().includes(q.toLowerCase()));
+function performSearch(){
+  const q = (qEl.value || '').trim().toLowerCase();
+  if(!q){
+    renderResults([]);
+    return;
+  }
+  const filtered = files.filter(f => f.name.toLowerCase().includes(q));
   renderResults(filtered);
 }
 
-searchBtn.addEventListener('click', doSearch);
-qEl.addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); });
+searchBtn.addEventListener('click', performSearch);
+qEl.addEventListener('keydown', (e) => { if(e.key === 'Enter') performSearch(); });
 
-/* initial countdown + load */
-let t = 10, el = document.getElementById('count');
-const interval = setInterval(()=>{ el.textContent = --t; if(t<=0) clearInterval(interval); }, 1000);
-
+/* init */
 (async function init(){
   await loadAllFiles();
-  // Optional: auto-search if q param present
+  // optional auto-search from URL param
   const params = new URLSearchParams(location.search);
   const q = params.get('q');
-  if(q){ qEl.value = q; doSearch(); }
+  if(q){ qEl.value = q; performSearch(); }
 })();
 </script>
 </body>

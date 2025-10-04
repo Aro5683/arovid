@@ -1,8 +1,11 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
 <title>Movies Aro</title>
 <style>
 :root {
@@ -122,12 +125,14 @@ footer {
   color: var(--muted);
 }
 
+/* 🔹 Mobile responsive */
 @media (max-width: 600px) {
   h1 { font-size: 1.7rem; }
   .controls { flex-direction: column; }
   button { width: 100%; }
 }
 </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -137,7 +142,7 @@ footer {
 <button id="searchBtn">Search</button>
 </div>
 
-<div> ⌛ Please wait.. <span id="count">10</span> seconds then search</div>
+   <div> ⌛ Please wait.. <span id="count">10</span> seconds then search</div>
 <script>
 let t=10,el=document.getElementById("count");
 let x=setInterval(()=>{
@@ -145,51 +150,81 @@ let x=setInterval(()=>{
   if(t<=0) clearInterval(x);
 },1000);
 </script>
+  <br/>
+    <div class="button-box">
+    <button onclick="window.open('https://moviesaro.netlify.app', '_self')">
+      Go to Movies Aro (OLD)
+    </button>
+    <button onclick="window.open('https://moviesarodub.netlify.app', '_self')">
+      All Tamil Dubbed Movies
+    </button>
+  </div>
 
-<br/>
-<div class="button-box">
-  <button onclick="window.open('https://moviesaro.netlify.app', '_self')">Go to Movies Aro (OLD)</button>
-  <button onclick="window.open('https://moviesarodub.netlify.app', '_self')">All Tamil Dubbed Movies</button>
-</div>
-
-<style>
-.button-box {
-  text-align: center;
-  margin: 20px auto;
-}
-.button-box button {
-  display: inline-block;
-  margin: 12px 0;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #0b63ff, #3a9dff);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.3s ease;
-}
-.button-box button:hover {
-  background: linear-gradient(135deg, #0954d6, #338ae6);
-  transform: translateY(-2px);
-}
-.button-box button:active {
-  transform: scale(0.97);
-}
-</style>
-
+  <style>
+    .button-box {
+      text-align: center;
+      margin: 20px auto;
+    }
+    .button-box button {
+      display: inline-block;
+      margin: 12px 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #0b63ff, #3a9dff);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+    .button-box button:hover {
+      background: linear-gradient(135deg, #0954d6, #338ae6);
+      transform: translateY(-2px);
+    }
+    .button-box button:active {
+      transform: scale(0.97);
+    }
+  </style>
 <div id="output"></div>
 </div>
 
 <script>
+// Escape HTML utility
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+// Yearly text files
+// Yearly text files
 const yearlyFiles = [
-  "1920.txt","1945.txt","1947.txt","1950.txt","1993.txt","1995.txt","1996.txt","1999.txt",
-  "2003.txt","2005.txt","2007.txt","2008.txt","2009.txt","2010.txt","2012.txt","2013.txt",
-  "2014.txt","2015.txt","2016.txt","2017.txt","2018.txt","2019.txt","2020.txt","2021.txt",
-  "2022.txt","2023.txt","2024.txt","2025.txt","Unknown_Year.txt"
+  "1920.txt",
+  "1945.txt",
+  "1947.txt",
+  "1950.txt",
+  "1993.txt",
+  "1995.txt",
+  "1996.txt",
+  "1999.txt",
+  "2003.txt",
+  "2005.txt",
+  "2007.txt",
+  "2008.txt",
+  "2009.txt",
+  "2010.txt",
+  "2012.txt",
+  "2013.txt",
+  "2014.txt",
+  "2015.txt",
+  "2016.txt",
+  "2017.txt",
+  "2018.txt",
+  "2019.txt",
+  "2020.txt",
+  "2021.txt",
+  "2022.txt",
+  "2023.txt",
+  "2024.txt",
+  "2025.txt",
+  "Unknown_Year.txt"
 ];
 
 let files = [];
@@ -211,6 +246,7 @@ async function loadAllFiles() {
   }
 }
 
+// Render results
 function renderResults(list){
   const outEl=document.getElementById('output');
   outEl.innerHTML='';
@@ -236,6 +272,7 @@ function renderResults(list){
   });
 }
 
+// Fetch & display download section
 async function fetchAndShowDownloadDiv(targetUrl, containerEl){
   containerEl.innerHTML='<div class="loading">Please Wait....</div>';
   const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(targetUrl);
@@ -248,85 +285,55 @@ async function fetchAndShowDownloadDiv(targetUrl, containerEl){
   if(!downloadDiv){ const m=text.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i); if(m&&m[0]) downloadDiv=parser.parseFromString(m[0],'text/html').body.firstElementChild; }
   if(!downloadDiv){ containerEl.innerHTML='<div class="error">No .download section found</div>'; return; }
   containerEl.innerHTML=downloadDiv.outerHTML;
-
   containerEl.querySelectorAll('a').forEach(a=>{
-    a.setAttribute('target','_blank');
-    a.setAttribute('rel','noopener noreferrer nofollow');
+    a.setAttribute('target','_blank'); a.setAttribute('rel','noopener noreferrer nofollow');
     a.addEventListener('click', e=>{
-      e.preventDefault();
-      const originalUrl=a.href;
-
-      // Open ad site in background
-      window.open('https://otieu.com/4/9535254','_blank');
-
-      // After 6 sec, open video player directly
-      setTimeout(()=>{
-        const videoPopup=document.createElement('div');
-        Object.assign(videoPopup.style,{
-          position:'fixed',
-          top:'0',left:'0',
-          width:'100%',height:'100%',
-          backgroundColor:'rgba(0,0,0,0.95)',
-          display:'flex',
-          alignItems:'center',
-          justifyContent:'center',
-          zIndex:'9999',
-          flexDirection:'column'
+      e.preventDefault(); const originalUrl=a.href;
+      const choicePopup=document.createElement('div');
+      Object.assign(choicePopup.style,{position:'fixed',top:'0',left:'0',width:'100%',height:'100%',backgroundColor:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:'9999'});
+      choicePopup.innerHTML=`
+        <div style="background:#fff;padding:20px;border-radius:8px;text-align:center;max-width:300px;color:black;">
+          <p>Choose an option:</p>
+          <button id="playOnlineBtn" style="padding:8px 16px;margin:5px;">Play Online</button>
+          <button id="downloadBtn" style="padding:8px 16px;margin:5px;">Download</button>
+        </div>`;
+      document.body.appendChild(choicePopup);
+      function showOkPopup(action){
+        document.body.removeChild(choicePopup);
+        const okPopup=document.createElement('div');
+        Object.assign(okPopup.style,{position:'fixed',top:'0',left:'0',width:'100%',height:'100%',backgroundColor:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:'9999'});
+        okPopup.innerHTML=`<div style="background:#fff;padding:20px;border-radius:8px;text-align:center;max-width:300px;color:black;">
+          <p>இப்போது நீங்கள் புதிய தளத்திற்கு செல்லப்படுவீர்கள்… அங்கு 5 விநாடிகள் காத்திருக்கவும். பின்னர் இங்கு வரவும்.</p>
+          <button id="okBtn" style="padding:8px 16px;margin-top:10px;">OK</button>
+        </div>`;
+        document.body.appendChild(okPopup);
+        okPopup.querySelector('#okBtn').addEventListener('click',()=>{
+          document.body.removeChild(okPopup);
+          window.open('https://otieu.com/4/9535254','_blank');
+          setTimeout(()=>{
+            if(action==='download'){ window.location.href=originalUrl; }
+            else if(action==='play'){
+              const videoPopup=document.createElement('div');
+              Object.assign(videoPopup.style,{position:'fixed',top:'50%',left:'50%',width:'80%',background:'#fff',padding:'10px',transform:'translate(-50%, -50%)',zIndex:'9999',maxWidth:'90vw',maxHeight:'90vh',overflow:'auto'});
+              const closeBtn=document.createElement('button'); closeBtn.textContent='Close'; closeBtn.style.display='block'; closeBtn.style.marginBottom='10px';
+              const loader=document.createElement('div'); loader.textContent='Loading video...'; loader.style.textAlign='center'; loader.style.marginBottom='10px';
+              const video=document.createElement('video'); video.setAttribute('playsinline',''); video.setAttribute('preload','auto'); video.setAttribute('autoplay',''); video.setAttribute('muted',''); video.setAttribute('controls',''); video.setAttribute('controlsList','nodownload'); video.style.maxWidth='100%'; video.style.maxHeight='80vh';
+              video.addEventListener('contextmenu',e=>e.preventDefault());
+              const source=document.createElement('source'); source.src=originalUrl; source.type='video/mp4'; video.appendChild(source);
+              video.addEventListener('canplay',()=>{ loader.remove(); });
+              videoPopup.appendChild(closeBtn); videoPopup.appendChild(loader); videoPopup.appendChild(video); document.body.appendChild(videoPopup);
+              closeBtn.addEventListener('click',()=>{ document.body.removeChild(videoPopup); });
+            }
+          },6000);
         });
-
-        const closeBtn=document.createElement('button');
-        closeBtn.textContent='✖';
-        Object.assign(closeBtn.style,{
-          position:'absolute',
-          top:'15px',
-          right:'20px',
-          fontSize:'22px',
-          color:'#fff',
-          background:'transparent',
-          border:'none',
-          cursor:'pointer'
-        });
-
-        const videoWrapper=document.createElement('div');
-        Object.assign(videoWrapper.style,{
-          width:'80%',
-          maxWidth:'900px',
-          aspectRatio:'16 / 9',
-          backgroundColor:'#000',
-          boxShadow:'0 0 20px rgba(0,0,0,0.6)',
-          borderRadius:'8px',
-          overflow:'hidden'
-        });
-
-        const video=document.createElement('video');
-        video.setAttribute('playsinline','');
-        video.setAttribute('preload','auto');
-        video.setAttribute('autoplay','');
-        video.setAttribute('controls','');
-        video.setAttribute('controlsList','nodownload');
-        Object.assign(video.style,{
-          width:'100%',
-          height:'100%',
-          backgroundColor:'#000'
-        });
-        video.addEventListener('contextmenu',e=>e.preventDefault());
-
-        const source=document.createElement('source');
-        source.src=originalUrl;
-        source.type='video/mp4';
-        video.appendChild(source);
-
-        videoWrapper.appendChild(video);
-        videoPopup.appendChild(closeBtn);
-        videoPopup.appendChild(videoWrapper);
-        document.body.appendChild(videoPopup);
-
-        closeBtn.addEventListener('click',()=>{ document.body.removeChild(videoPopup); });
-      },6000);
+      }
+      choicePopup.querySelector('#playOnlineBtn').addEventListener('click',()=>showOkPopup('play'));
+      choicePopup.querySelector('#downloadBtn').addEventListener('click',()=>showOkPopup('download'));
     });
   });
 }
 
+// Search
 const qEl=document.getElementById('q');
 const searchBtn=document.getElementById('searchBtn');
 
@@ -340,7 +347,7 @@ searchBtn.addEventListener('click', doSearch);
 qEl.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
 async function init() {
-  await loadAllFiles();
+  await loadAllFiles(); // wait for .txt files to load
   const params = new URLSearchParams(window.location.search);
   const query = params.get("q");
   if (query) {
@@ -348,7 +355,9 @@ async function init() {
     doSearch();
   }
 }
+
 init();
+
 </script>
 </body>
 </html>

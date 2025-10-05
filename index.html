@@ -181,17 +181,21 @@ footer {
 
 #closeVideo {
   position: absolute;
-  top: 10px;
+  top: 50px; /* Move it below the video-header */
   right: 12px;
-  background: none;
+  background: rgba(0,0,0,0.6);
   border: none;
-  color: var(--yt-text);
+  color: #fff;
   font-size: 1.4rem;
   cursor: pointer;
   z-index: 10;
+  padding: 4px 8px;
+  border-radius: 4px;
   opacity: 0.8;
 }
 #closeVideo:hover { opacity: 1; }
+
+
 
 .loader {
   position: absolute;
@@ -237,7 +241,7 @@ footer {
   <div class="video-container">
     <button id="closeVideo">✕</button>
     <div class="video-header" id="videoTitle">Now Playing</div>
-    <img id="videoThumb" class="video-thumb" src="https://via.placeholder.com/260x390?text=No+Poster">
+    <img id="videoThumb" class="video-thumb" src="moviesaro.png">
     <div class="loader" id="videoLoader"></div>
     <video id="videoPlayer" class="video-player" controls autoplay playsinline controlsList="nodownload"></video>
   </div>

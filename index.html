@@ -321,7 +321,7 @@ async function renderResults(list){
 
 async function fetchAndShow(url,el,title){
   el.innerHTML='<div class="loading">Please Wait...</div>';
-  const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const proxy=`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
   let txt;
   try{const r=await fetch(proxy);txt=await r.text();}
   catch{const fb=`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;const r2=await fetch(fb);txt=await r2.text();}

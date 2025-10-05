@@ -34,16 +34,8 @@ header {
   top: 0;
   z-index: 999;
 }
-header h1 {
-  color: var(--yt-accent);
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-header span#status {
-  color: var(--yt-muted);
-  font-size: 0.9rem;
-}
+header h1 { color: var(--yt-accent); margin:0; font-size:1.6rem; font-weight:700; }
+header span#status { color: var(--yt-muted); font-size:0.9rem; }
 
 .main {
   max-width: 960px;
@@ -87,12 +79,25 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .result:hover { background: var(--yt-hover); }
+
+.poster {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: #111;
+  object-fit: cover;
+}
 
 .meta {
   font-size: 0.95rem;
   margin-bottom: 10px;
+  text-align: center;
   white-space: pre-wrap;
 }
 
@@ -122,7 +127,7 @@ footer {
   border-top: 1px solid var(--yt-border);
 }
 
-/* 🎬 YouTube-style video overlay with loading animation */
+/* 🎬 YouTube-style overlay */
 #videoOverlay {
   display: none;
   position: fixed;
@@ -164,6 +169,16 @@ footer {
   transition: opacity 0.4s ease;
 }
 
+.video-thumb {
+  width: 100%;
+  height: 65vh;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease;
+}
+
 #closeVideo {
   position: absolute;
   top: 10px;
@@ -178,7 +193,6 @@ footer {
 }
 #closeVideo:hover { opacity: 1; }
 
-/* 🔄 Loader spinner */
 .loader {
   position: absolute;
   top: 50%; left: 50%;
@@ -194,7 +208,7 @@ footer {
 @media (max-width: 600px) {
   .controls { flex-direction: column; }
   button { width: 100%; }
-  .video-player { height: 45vh; }
+  .video-player, .video-thumb { height: 45vh; }
 }
 </style>
 </head>
@@ -218,11 +232,12 @@ footer {
 
 <footer>© 2025 Movies Aro • All Rights Reserved</footer>
 
-<!-- 🎥 YouTube-style player overlay -->
+<!-- 🎥 Overlay -->
 <div id="videoOverlay">
   <div class="video-container">
     <button id="closeVideo">✕</button>
     <div class="video-header" id="videoTitle">Now Playing</div>
+    <img id="videoThumb" class="video-thumb" src="https://via.placeholder.com/260x390?text=No+Poster">
     <div class="loader" id="videoLoader"></div>
     <video id="videoPlayer" class="video-player" controls autoplay playsinline controlsList="nodownload"></video>
   </div>
@@ -238,6 +253,7 @@ const yearlyFiles=[
   "2014.txt","2015.txt","2016.txt","2017.txt","2018.txt","2019.txt","2020.txt","2021.txt",
   "2022.txt","2023.txt","2024.txt","2025.txt","Unknown_Year.txt"
 ];
+
 let files=[],loadedCount=0;
 
 function escapeHtml(s){return String(s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
@@ -263,14 +279,15 @@ async function loadAllFiles(){
   statusEl.textContent=`✅ Loaded ${loadedCount} / ${yearlyFiles.length} files`;
 }
 
-function renderResults(list){
+async function renderResults(list){
   const out=document.getElementById('output');
   out.innerHTML='';
   if(!list.length){out.innerHTML='<div class="error">No results found.</div>';return;}
-  list.forEach((f,i)=>{
+  for(const [i,f] of list.entries()){
     const c=document.createElement('div');
     c.className='result';
     c.innerHTML=`
+      <img src="https://via.placeholder.com/260x390?text=No+Poster" alt="Poster" class="poster">
       <div class="meta"><b>${escapeHtml(f.name)}</b><br>Size: ${escapeHtml(f.size)}</div>
       <button data-link="${escapeHtml(f.link)}" data-title="${escapeHtml(f.name)}" class="get-links">Show Play Servers</button>
       <div class="links" id="links-${i}"></div>`;
@@ -285,7 +302,7 @@ function renderResults(list){
       catch(e){box.innerHTML='<div class="error">Error loading</div>';}
       btn.disabled=false;btn.textContent=t;
     });
-  });
+  }
 }
 
 async function fetchAndShow(url,el,title){
@@ -315,8 +332,10 @@ function playVideo(src,title){
   const overlay=document.getElementById('videoOverlay');
   const player=document.getElementById('videoPlayer');
   const loader=document.getElementById('videoLoader');
+  const thumb=document.getElementById('videoThumb');
   const titleEl=document.getElementById('videoTitle');
   titleEl.textContent=title||'Now Playing';
+  thumb.style.opacity=1;
   player.style.opacity=0;
   loader.style.display='block';
   player.src=src;
@@ -324,6 +343,7 @@ function playVideo(src,title){
   player.load();
   player.addEventListener('canplay',()=>{
     loader.style.display='none';
+    thumb.style.opacity=0;
     player.style.opacity=1;
   },{once:true});
 }

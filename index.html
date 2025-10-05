@@ -182,18 +182,23 @@ footer {
   transition: opacity 0.3s ease;
 }
 
+/* Move close button to top-right corner of the overlay container */
 #closeVideo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   background: rgba(0,0,0,0.6);
   border: none;
   color: #fff;
   font-size: 1.4rem;
   cursor: pointer;
-  z-index: 10;
+  z-index: 20;
   padding: 4px 8px;
   border-radius: 4px;
   opacity: 0.8;
 }
 #closeVideo:hover { opacity: 1; }
+
 
 .loader {
   position: absolute;
@@ -242,16 +247,15 @@ footer {
 <!-- 🎥 Overlay -->
 <div id="videoOverlay">
   <div class="video-container">
-    <div class="video-header">
-      <span id="videoTitle">Now Playing</span>
-      <button id="closeVideo">✕</button>
-    </div>
+    <button id="closeVideo">✕</button> <!-- top-right corner -->
+    <div class="video-header" id="videoTitle">Now Playing</div>
     <img id="videoThumb" class="video-thumb" src="moviesaro.png">
     <div class="loader" id="videoLoader"></div>
     <video id="videoPlayer" class="video-player" controls autoplay playsinline controlsList="nodownload"></video>
     <div class="video-note">குறிப்பு: வேகமான சினிமா ஏற்றலுக்கு உங்கள் இன்டர்நெட் இணைப்பு நல்லதாக இருக்க வேண்டும்</div>
   </div>
 </div>
+
 
 <script>
 const yearlyFiles=[
@@ -297,7 +301,7 @@ async function renderResults(list){
     const c=document.createElement('div');
     c.className='result';
     c.innerHTML=`
-      <img src="https://via.placeholder.com/260x390?text=No+Poster" alt="Poster" class="poster">
+      <img src="moviesaro.png" alt="Poster" class="poster">
       <div class="meta"><b>${escapeHtml(f.name)}</b><br>Size: ${escapeHtml(f.size)}</div>
       <button data-link="${escapeHtml(f.link)}" data-title="${escapeHtml(f.name)}" class="get-links">Show Play Servers</button>
       <div class="links" id="links-${i}"></div>`;

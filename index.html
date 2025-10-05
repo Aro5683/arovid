@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Movies Aro</title>
+
 <style>
 :root {
   --yt-bg: #0f0f0f;
   --yt-surface: #181818;
-  --yt-hover: #212121;
+  --yt-hover: #222;
   --yt-text: #ffffff;
   --yt-muted: #aaaaaa;
   --yt-accent: #ff0000;
@@ -17,24 +18,38 @@
 
 body {
   font-family: "Roboto", "Segoe UI", sans-serif;
-  background-color: var(--yt-bg);
+  background: var(--yt-bg);
   color: var(--yt-text);
   margin: 0;
-  padding: 20px;
+  padding: 0;
 }
 
-.wrap {
-  max-width: 960px;
-  margin: 0 auto;
+header {
+  background: var(--yt-surface);
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--yt-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
-
-h1 {
-  text-align: center;
+header h1 {
   color: var(--yt-accent);
-  font-size: 2.2rem;
+  margin: 0;
+  font-size: 1.6rem;
   font-weight: 700;
-  margin-bottom: 25px;
-  text-transform: uppercase;
+}
+header span#status {
+  color: var(--yt-muted);
+  font-size: 0.9rem;
+}
+
+.main {
+  max-width: 960px;
+  margin: 30px auto;
+  padding: 0 15px;
 }
 
 .controls {
@@ -67,13 +82,6 @@ button {
 button:hover { background-color: #e60000; transform: translateY(-1px); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.hint {
-  color: var(--yt-muted);
-  font-size: 0.9rem;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
 .result {
   background: var(--yt-surface);
   border: 1px solid var(--yt-border);
@@ -92,8 +100,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .links {
   margin-top: 10px;
-  padding-top: 10px;
   border-top: 1px solid var(--yt-border);
+  padding-top: 10px;
 }
 .links a {
   display: inline-block;
@@ -110,67 +118,86 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .error { color: #ff6b6b; font-weight: 600; }
 .loading { color: var(--yt-muted); }
 
-/* Buttons section */
-.button-box {
+footer {
   text-align: center;
-  margin: 20px auto;
+  color: var(--yt-muted);
+  padding: 15px;
+  border-top: 1px solid var(--yt-border);
 }
-.button-box button {
-  display: inline-block;
-  margin: 8px;
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #fff;
-  background-color: var(--yt-accent);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.button-box button:hover { background-color: #e60000; }
 
-/* Video overlay player */
+/* 🎬 Advanced YouTube-style video overlay */
 #videoOverlay {
   display: none;
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.92);
+  background: rgba(0,0,0,0.97);
   z-index: 9999;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  animation: fadeIn 0.3s ease;
 }
-#videoOverlay video {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.video-container {
+  background: #000;
   width: 90%;
-  max-width: 900px;
-  max-height: 80vh;
-  background: black;
-  border-radius: 10px;
+  max-width: 1000px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  position: relative;
 }
+
+.video-header {
+  background: var(--yt-surface);
+  color: var(--yt-text);
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--yt-border);
+}
+
+.video-player {
+  width: 100%;
+  height: 65vh;
+  background: #000;
+}
+
 #closeVideo {
+  position: absolute;
+  top: 10px;
+  right: 12px;
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1.3rem;
-  margin-bottom: 10px;
+  color: var(--yt-text);
+  font-size: 1.4rem;
   cursor: pointer;
+  z-index: 10;
+  opacity: 0.8;
 }
+#closeVideo:hover { opacity: 1; }
 
 /* Mobile */
 @media (max-width: 600px) {
-  h1 { font-size: 1.7rem; }
   .controls { flex-direction: column; }
   button { width: 100%; }
+  .video-player { height: 45vh; }
 }
 </style>
 </head>
 
 <body>
-<div class="wrap">
+<header>
   <h1>Movies Aro</h1>
+  <span id="status">Loading files...</span>
+</header>
 
+<div class="main">
   <div class="controls">
     <input type="text" id="q" placeholder="Type movie name...">
     <button id="searchBtn">Search</button>
@@ -178,18 +205,18 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
   <div class="hint">⌛ Please wait.. <span id="count">10</span> seconds before searching.</div>
 
-  <div class="button-box">
-    <button onclick="window.open('https://moviesaro.netlify.app','_self')">Go to Movies Aro (OLD)</button>
-    <button onclick="window.open('https://moviesarodub.netlify.app','_self')">All Tamil Dubbed Movies</button>
-  </div>
-
   <div id="output"></div>
 </div>
 
+<footer>© 2025 Movies Aro • All Rights Reserved</footer>
+
 <!-- YouTube-style video overlay -->
 <div id="videoOverlay">
-  <button id="closeVideo">✕ Close</button>
-  <video id="videoPlayer" controls autoplay playsinline controlsList="nodownload"></video>
+  <div class="video-container">
+    <button id="closeVideo">✕</button>
+    <div class="video-header" id="videoTitle">Now Playing</div>
+    <video id="videoPlayer" class="video-player" controls autoplay playsinline controlsList="nodownload"></video>
+  </div>
 </div>
 
 <script>
@@ -198,6 +225,7 @@ let x=setInterval(()=>{ el.textContent=--t; if(t<=0) clearInterval(x); },1000);
 
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+// ✅ Include all known yearly files
 const yearlyFiles = [
   "1920.txt","1945.txt","1947.txt","1950.txt","1993.txt","1995.txt","1996.txt","1999.txt",
   "2003.txt","2005.txt","2007.txt","2008.txt","2009.txt","2010.txt","2012.txt","2013.txt",
@@ -206,10 +234,12 @@ const yearlyFiles = [
 ];
 
 let files = [];
+let loadedCount = 0;
 
 async function loadAllFiles() {
-  for(const fname of yearlyFiles){
-    try{
+  const statusEl = document.getElementById('status');
+  for (const fname of yearlyFiles) {
+    try {
       const resp = await fetch(fname);
       const data = await resp.text();
       const rawBlocks = data.split('---').map(b=>b.trim()).filter(Boolean);
@@ -220,8 +250,13 @@ async function loadAllFiles() {
         return { name: nameM?nameM[1].trim(): '', size: sizeM?sizeM[1].trim():'', link: linkM?linkM[1].trim(): '' };
       }).filter(f=>f.name && f.size && f.link);
       files = files.concat(parsed);
-    }catch(e){console.error("Failed to load",fname,e);}
+      loadedCount++;
+    } catch(e) {
+      console.warn("Failed to load", fname);
+    }
+    statusEl.textContent = `Loaded ${loadedCount} / ${yearlyFiles.length} files`;
   }
+  statusEl.textContent = `✅ Loaded ${loadedCount} / ${yearlyFiles.length} files`;
 }
 
 function renderResults(list){
@@ -232,7 +267,7 @@ function renderResults(list){
     const container=document.createElement('div'); container.className='result';
     container.innerHTML=`
       <div class="meta"><b>${escapeHtml(f.name)}</b><br>Size: ${escapeHtml(f.size)}</div>
-      <button data-link="${escapeHtml(f.link)}" class="get-links">Show Play Servers</button>
+      <button data-link="${escapeHtml(f.link)}" data-title="${escapeHtml(f.name)}" class="get-links">Show Play Servers</button>
       <div class="links" id="links-${idx}" aria-live="polite"></div>
     `;
     outEl.appendChild(container);
@@ -242,14 +277,14 @@ function renderResults(list){
       btn.disabled=true;
       const originalText=btn.textContent; btn.textContent='Loading...';
       linksContainer.innerHTML='';
-      try{ await fetchAndShowDownloadDiv(btn.dataset.link, linksContainer); }
+      try{ await fetchAndShowDownloadDiv(btn.dataset.link, linksContainer, btn.dataset.title); }
       catch(err){ linksContainer.innerHTML=`<div class="error">Error: ${escapeHtml(err.message||String(err))}</div>`; }
       finally{ btn.disabled=false; btn.textContent=originalText; }
     });
   });
 }
 
-async function fetchAndShowDownloadDiv(targetUrl, containerEl){
+async function fetchAndShowDownloadDiv(targetUrl, containerEl, movieTitle){
   containerEl.innerHTML='<div class="loading">Please Wait...</div>';
   const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(targetUrl);
   let text;
@@ -277,14 +312,16 @@ async function fetchAndShowDownloadDiv(targetUrl, containerEl){
     a.setAttribute('rel','noopener noreferrer');
     a.addEventListener('click', e=>{
       e.preventDefault();
-      playVideo(a.href);
+      playVideo(a.href, movieTitle);
     });
   });
 }
 
-function playVideo(src){
+function playVideo(src, title){
   const overlay=document.getElementById('videoOverlay');
   const player=document.getElementById('videoPlayer');
+  const titleEl=document.getElementById('videoTitle');
+  titleEl.textContent = title || "Now Playing";
   player.src=src;
   overlay.style.display='flex';
 }
@@ -300,7 +337,7 @@ const qEl=document.getElementById('q');
 const searchBtn=document.getElementById('searchBtn');
 function doSearch(){
   const q=qEl.value.trim();
-  if(!q){ document.getElementById('output').innerHTML='<div class="hint">Type a search term.</div>'; return; }
+  if(!q){ document.getElementById('output').innerHTML='<div class="error">Type a search term.</div>'; return; }
   const filtered=files.filter(f=>f.name.toLowerCase().includes(q.toLowerCase()));
   renderResults(filtered);
 }

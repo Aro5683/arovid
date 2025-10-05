@@ -21,7 +21,6 @@ body {
   background: var(--yt-bg);
   color: var(--yt-text);
   margin: 0;
-  padding: 0;
 }
 
 header {
@@ -88,7 +87,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 15px;
-  transition: background 0.2s;
 }
 .result:hover { background: var(--yt-hover); }
 
@@ -111,7 +109,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   margin: 5px 8px 0 0;
   color: var(--yt-text);
   text-decoration: none;
-  transition: background 0.2s;
 }
 .links a:hover { background: var(--yt-accent); }
 
@@ -125,7 +122,7 @@ footer {
   border-top: 1px solid var(--yt-border);
 }
 
-/* 🎬 Advanced YouTube-style video overlay */
+/* 🎬 YouTube-style video overlay with loading animation */
 #videoOverlay {
   display: none;
   position: fixed;
@@ -138,10 +135,7 @@ footer {
   flex-direction: column;
   animation: fadeIn 0.3s ease;
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
 .video-container {
   background: #000;
@@ -166,6 +160,8 @@ footer {
   width: 100%;
   height: 65vh;
   background: #000;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 #closeVideo {
@@ -182,7 +178,19 @@ footer {
 }
 #closeVideo:hover { opacity: 1; }
 
-/* Mobile */
+/* 🔄 Loader spinner */
+.loader {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border: 5px solid #333;
+  border-top: 5px solid var(--yt-accent);
+  border-radius: 50%;
+  width: 50px; height: 50px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
+
 @media (max-width: 600px) {
   .controls { flex-direction: column; }
   button { width: 100%; }
@@ -210,11 +218,12 @@ footer {
 
 <footer>© 2025 Movies Aro • All Rights Reserved</footer>
 
-<!-- YouTube-style video overlay -->
+<!-- 🎥 YouTube-style player overlay -->
 <div id="videoOverlay">
   <div class="video-container">
     <button id="closeVideo">✕</button>
     <div class="video-header" id="videoTitle">Now Playing</div>
+    <div class="loader" id="videoLoader"></div>
     <video id="videoPlayer" class="video-player" controls autoplay playsinline controlsList="nodownload"></video>
   </div>
 </div>
@@ -223,134 +232,121 @@ footer {
 let t=10,el=document.getElementById("count");
 let x=setInterval(()=>{ el.textContent=--t; if(t<=0) clearInterval(x); },1000);
 
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// ✅ Include all known yearly files
-const yearlyFiles = [
+const yearlyFiles=[
   "1920.txt","1945.txt","1947.txt","1950.txt","1993.txt","1995.txt","1996.txt","1999.txt",
   "2003.txt","2005.txt","2007.txt","2008.txt","2009.txt","2010.txt","2012.txt","2013.txt",
   "2014.txt","2015.txt","2016.txt","2017.txt","2018.txt","2019.txt","2020.txt","2021.txt",
   "2022.txt","2023.txt","2024.txt","2025.txt","Unknown_Year.txt"
 ];
+let files=[],loadedCount=0;
 
-let files = [];
-let loadedCount = 0;
+function escapeHtml(s){return String(s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
-async function loadAllFiles() {
-  const statusEl = document.getElementById('status');
-  for (const fname of yearlyFiles) {
-    try {
-      const resp = await fetch(fname);
-      const data = await resp.text();
-      const rawBlocks = data.split('---').map(b=>b.trim()).filter(Boolean);
-      const parsed = rawBlocks.map(block=>{
-        const nameM = block.match(/File Name:\s*(.*)/i);
-        const sizeM = block.match(/File Size:\s*(.*)/i);
-        const linkM = block.match(/Download Link:\s*(.*)/i);
-        return { name: nameM?nameM[1].trim(): '', size: sizeM?sizeM[1].trim():'', link: linkM?linkM[1].trim(): '' };
-      }).filter(f=>f.name && f.size && f.link);
-      files = files.concat(parsed);
+async function loadAllFiles(){
+  const statusEl=document.getElementById('status');
+  for(const fname of yearlyFiles){
+    try{
+      const resp=await fetch(fname);
+      const data=await resp.text();
+      const rawBlocks=data.split('---').map(b=>b.trim()).filter(Boolean);
+      const parsed=rawBlocks.map(b=>{
+        const nameM=b.match(/File Name:\s*(.*)/i);
+        const sizeM=b.match(/File Size:\s*(.*)/i);
+        const linkM=b.match(/Download Link:\s*(.*)/i);
+        return {name:nameM?nameM[1].trim():'',size:sizeM?sizeM[1].trim():'',link:linkM?linkM[1].trim():''};
+      }).filter(f=>f.name&&f.size&&f.link);
+      files=files.concat(parsed);
       loadedCount++;
-    } catch(e) {
-      console.warn("Failed to load", fname);
-    }
-    statusEl.textContent = `Loaded ${loadedCount} / ${yearlyFiles.length} files`;
+    }catch{}
+    statusEl.textContent=`Loaded ${loadedCount} / ${yearlyFiles.length} files`;
   }
-  statusEl.textContent = `✅ Loaded ${loadedCount} / ${yearlyFiles.length} files`;
+  statusEl.textContent=`✅ Loaded ${loadedCount} / ${yearlyFiles.length} files`;
 }
 
 function renderResults(list){
-  const outEl=document.getElementById('output');
-  outEl.innerHTML='';
-  if(!list.length){ outEl.innerHTML='<div class="error">No results found.</div>'; return; }
-  list.forEach((f,idx)=>{
-    const container=document.createElement('div'); container.className='result';
-    container.innerHTML=`
+  const out=document.getElementById('output');
+  out.innerHTML='';
+  if(!list.length){out.innerHTML='<div class="error">No results found.</div>';return;}
+  list.forEach((f,i)=>{
+    const c=document.createElement('div');
+    c.className='result';
+    c.innerHTML=`
       <div class="meta"><b>${escapeHtml(f.name)}</b><br>Size: ${escapeHtml(f.size)}</div>
       <button data-link="${escapeHtml(f.link)}" data-title="${escapeHtml(f.name)}" class="get-links">Show Play Servers</button>
-      <div class="links" id="links-${idx}" aria-live="polite"></div>
-    `;
-    outEl.appendChild(container);
-    const btn=container.querySelector('.get-links');
-    const linksContainer=container.querySelector(`#links-${idx}`);
-    btn.addEventListener('click', async ()=>{
+      <div class="links" id="links-${i}"></div>`;
+    out.appendChild(c);
+    const btn=c.querySelector('.get-links');
+    const box=c.querySelector(`#links-${i}`);
+    btn.addEventListener('click',async()=>{
       btn.disabled=true;
-      const originalText=btn.textContent; btn.textContent='Loading...';
-      linksContainer.innerHTML='';
-      try{ await fetchAndShowDownloadDiv(btn.dataset.link, linksContainer, btn.dataset.title); }
-      catch(err){ linksContainer.innerHTML=`<div class="error">Error: ${escapeHtml(err.message||String(err))}</div>`; }
-      finally{ btn.disabled=false; btn.textContent=originalText; }
+      const t=btn.textContent;
+      btn.textContent='Loading...';
+      try{await fetchAndShow(btn.dataset.link,box,btn.dataset.title);}
+      catch(e){box.innerHTML='<div class="error">Error loading</div>';}
+      btn.disabled=false;btn.textContent=t;
     });
   });
 }
 
-async function fetchAndShowDownloadDiv(targetUrl, containerEl, movieTitle){
-  containerEl.innerHTML='<div class="loading">Please Wait...</div>';
-  const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(targetUrl);
-  let text;
-  try{ const resp=await fetch(proxyUrl); if(!resp.ok) throw new Error(resp.status); text=await resp.text(); }
-  catch(err){
-    const fallback='https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(targetUrl);
-    const r2=await fetch(fallback); if(!r2.ok) throw new Error(r2.status);
-    text=await r2.text();
+async function fetchAndShow(url,el,title){
+  el.innerHTML='<div class="loading">Please Wait...</div>';
+  const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  let txt;
+  try{const r=await fetch(proxy);txt=await r.text();}
+  catch{const fb=`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;const r2=await fetch(fb);txt=await r2.text();}
+  const p=new DOMParser();
+  const d=p.parseFromString(txt,'text/html');
+  let div=d.querySelector('.download');
+  if(!div){
+    const m=txt.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i);
+    if(m)div=p.parseFromString(m[0],'text/html').body.firstElementChild;
   }
-
-  const parser=new DOMParser();
-  const doc=parser.parseFromString(text,'text/html');
-  let downloadDiv=doc.querySelector('.download');
-  if(!downloadDiv){
-    const m=text.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i);
-    if(m&&m[0]) downloadDiv=parser.parseFromString(m[0],'text/html').body.firstElementChild;
-  }
-  if(!downloadDiv){ containerEl.innerHTML='<div class="error">No play section found.</div>'; return; }
-
-  // Rename Download Servers → Play Servers
-  containerEl.innerHTML = downloadDiv.outerHTML.replace(/Download Server/gi, "Play Server");
-
-  containerEl.querySelectorAll('a').forEach(a=>{
-    a.setAttribute('target','_blank');
-    a.setAttribute('rel','noopener noreferrer');
-    a.addEventListener('click', e=>{
+  if(!div){el.innerHTML='<div class="error">No play section found.</div>';return;}
+  el.innerHTML=div.outerHTML.replace(/Download Server/gi,'Play Server');
+  el.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click',e=>{
       e.preventDefault();
-      playVideo(a.href, movieTitle);
+      playVideo(a.href,title);
     });
   });
 }
 
-function playVideo(src, title){
+function playVideo(src,title){
   const overlay=document.getElementById('videoOverlay');
   const player=document.getElementById('videoPlayer');
+  const loader=document.getElementById('videoLoader');
   const titleEl=document.getElementById('videoTitle');
-  titleEl.textContent = title || "Now Playing";
+  titleEl.textContent=title||'Now Playing';
+  player.style.opacity=0;
+  loader.style.display='block';
   player.src=src;
   overlay.style.display='flex';
+  player.load();
+  player.addEventListener('canplay',()=>{
+    loader.style.display='none';
+    player.style.opacity=1;
+  },{once:true});
 }
 
 document.getElementById('closeVideo').addEventListener('click',()=>{
-  const overlay=document.getElementById('videoOverlay');
-  const player=document.getElementById('videoPlayer');
-  player.pause(); player.src='';
-  overlay.style.display='none';
+  const o=document.getElementById('videoOverlay');
+  const p=document.getElementById('videoPlayer');
+  p.pause();p.src='';
+  o.style.display='none';
 });
 
-const qEl=document.getElementById('q');
-const searchBtn=document.getElementById('searchBtn');
-function doSearch(){
-  const q=qEl.value.trim();
-  if(!q){ document.getElementById('output').innerHTML='<div class="error">Type a search term.</div>'; return; }
-  const filtered=files.filter(f=>f.name.toLowerCase().includes(q.toLowerCase()));
-  renderResults(filtered);
+const q=document.getElementById('q');
+document.getElementById('searchBtn').addEventListener('click',()=>search());
+q.addEventListener('keydown',e=>{if(e.key==='Enter')search();});
+function search(){
+  const val=q.value.trim();
+  const out=document.getElementById('output');
+  if(!val){out.innerHTML='<div class="error">Type a search term.</div>';return;}
+  const res=files.filter(f=>f.name.toLowerCase().includes(val.toLowerCase()));
+  renderResults(res);
 }
-searchBtn.addEventListener('click', doSearch);
-qEl.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
-async function init(){
-  await loadAllFiles();
-  const params=new URLSearchParams(window.location.search);
-  const query=params.get("q");
-  if(query){ qEl.value=query; doSearch(); }
-}
-init();
+(async()=>{await loadAllFiles();})();
 </script>
 </body>
 </html>

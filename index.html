@@ -319,27 +319,78 @@ async function renderResults(list){
   }
 }
 
-async function fetchAndShow(url,el,title){
-  el.innerHTML='<div class="loading">Please Wait...</div>';
-  const proxy=`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+async function fetchAndShow(url, el, title) {
+  el.innerHTML = '<div class="loading">Please Wait...</div>';
+  const proxy = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
   let txt;
-  try{const r=await fetch(proxy);txt=await r.text();}
-  catch{const fb=`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;const r2=await fetch(fb);txt=await r2.text();}
-  const p=new DOMParser();
-  const d=p.parseFromString(txt,'text/html');
-  let div=d.querySelector('.download');
-  if(!div){
-    const m=txt.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i);
-    if(m)div=p.parseFromString(m[0],'text/html').body.firstElementChild;
+  try {
+    const r = await fetch(proxy);
+    txt = await r.text();
+  } catch {
+    const fb = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+    const r2 = await fetch(fb);
+    txt = await r2.text();
   }
-  if(!div){el.innerHTML='<div class="error">No play section found.</div>';return;}
-  el.innerHTML=div.outerHTML.replace(/Download Server/gi,'Play Server');
-  el.querySelectorAll('a').forEach(a=>{
-    a.addEventListener('click',e=>{
+
+  const p = new DOMParser();
+  const d = p.parseFromString(txt, 'text/html');
+  let div = d.querySelector('.download');
+  if (!div) {
+    const m = txt.match(/<div[^>]*class=["']?download["']?[^>]*>[\s\S]*?<\/div>/i);
+    if (m) div = p.parseFromString(m[0], 'text/html').body.firstElementChild;
+  }
+
+  if (!div) {
+    el.innerHTML = '<div class="error">No play section found.</div>';
+    return;
+  }
+
+  // ✅ Clone the download section twice for separate Download/Play blocks
+  const downloadBlock = div.cloneNode(true);
+  const playBlock = div.cloneNode(true);
+
+  // Label headers
+  const downloadHeader = document.createElement('h4');
+  downloadHeader.textContent = 'Download Servers';
+  downloadHeader.style.color = '#ff6666';
+  downloadHeader.style.marginBottom = '8px';
+
+  const playHeader = document.createElement('h4');
+  playHeader.textContent = 'Play Servers';
+  playHeader.style.color = '#66ff66';
+  playHeader.style.margin = '12px 0 8px';
+
+  // Update text for Download servers
+  downloadBlock.querySelectorAll('a').forEach((a, i) => {
+    a.textContent = `Download Server ${i + 1}`;
+    a.addEventListener('click', (e) => {
       e.preventDefault();
-      playVideo(a.href,title);
+      // ✅ Open download link in self, then redirect to example.com after load
+      window.location.href = a.href;
+      window.addEventListener('load', () => {
+        window.location.href = 'https://example.com';
+      });
     });
   });
+
+  // Update text for Play servers
+  playBlock.querySelectorAll('a').forEach((a, i) => {
+    a.textContent = `Play Server ${i + 1}`;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      // ✅ Open example.com in new tab
+      window.open('https://example.com', '_blank');
+      // ✅ Play the video in self
+      playVideo(a.href, title);
+    });
+  });
+
+  // Clear and insert the final layout
+  el.innerHTML = '';
+  el.appendChild(downloadHeader);
+  el.appendChild(downloadBlock);
+  el.appendChild(playHeader);
+  el.appendChild(playBlock);
 }
 
 function playVideo(src,title){
